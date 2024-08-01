@@ -1,3 +1,4 @@
+use crate::parser::Config;
 use std::{io::Write, path::Path};
 use termion::{color, style};
 
@@ -62,7 +63,7 @@ fn get_dir_name(path: &Path) -> &str {
     path.as_os_str().to_str().unwrap_or("__error__")
 }
 
-pub fn explore_dir(output: &mut dyn Write, path: &Path, mut deep_tier: usize) {
+pub fn explore_dir(output: &mut dyn Write, path: &Path, mut deep_tier: usize, args: &Config) {
     print_dir_name(output, get_dir_name(path), deep_tier);
     deep_tier += 1;
     let dir_items: Vec<_> = path.read_dir().expect("read_dir call failed").collect();
@@ -70,12 +71,15 @@ pub fn explore_dir(output: &mut dyn Write, path: &Path, mut deep_tier: usize) {
         if let Ok(entry) = entry {
             let file_name = entry.file_name();
             let file_name = file_name.to_str().unwrap_or("__error__");
+            if !args.all && file_name.chars().nth(0).unwrap() == '.' {
+                continue;
+            }
             if let Ok(entry_type) = entry.file_type() {
-                if entry_type.is_file() {
+                if entry_type.is_file() && !args.directories {
                     print_file_name(output, file_name, deep_tier, idx + 1 == dir_items.len());
                 }
                 if entry_type.is_dir() {
-                    explore_dir(output, entry.path().as_path(), deep_tier);
+                    explore_dir(output, entry.path().as_path(), deep_tier, args);
                 }
             } else {
                 writeln!(output, "Couldn't get file type for {:?}", entry.path()).unwrap();
