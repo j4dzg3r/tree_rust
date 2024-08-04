@@ -6,6 +6,7 @@ use parser::Config;
 use std::{io::stdout, path::Path};
 
 fn main() {
+    let b: Box<str> = "123".into();
     let args = Config::parse_args();
     let path = Path::new(".");
     let mut stdout = stdout();
