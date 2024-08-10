@@ -1,4 +1,4 @@
-use clap::{ArgAction, Parser};
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 struct Cli {
